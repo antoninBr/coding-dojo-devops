@@ -52,21 +52,15 @@ jobs:
         run: terraform init
         working-directory: infra
 
-      - name: Terraform Validate
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-        run: terraform validate -var-file=env.tfvars
-        working-directory: infra
-
       - name: Terraform Plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
           TF_LOG: DEBUG
-        run: terraform plan -var-file=env.tfvars
+        run: terraform plan -var-file="env.tfvars"
         working-directory: infra
 
       - name: Terraform Apply
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-        run: terraform apply -auto-approve -var-file=env.tfvars
+        run: terraform apply -auto-approve -var-file="env.tfvars"
         working-directory: infra
