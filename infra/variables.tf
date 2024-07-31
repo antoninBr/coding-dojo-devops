@@ -6,5 +6,4 @@ variable "project_id" {
 variable "region" {
   description = "The region to deploy Cloud Run service."
   type        = string
-  default     = "us-central1"
 }

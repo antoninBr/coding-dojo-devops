@@ -1,2 +1,2 @@
-project_id = "<YOUR_GCP_PROJECT_ID>"
-region     = "us-central1"
+project_id = "coding-dojo-devops"
+region     = "europe-west9"

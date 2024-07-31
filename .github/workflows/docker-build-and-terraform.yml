@@ -50,8 +50,11 @@ jobs:
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
         run: terraform init
+        working-directory: infra
+
 
       - name: Terraform Apply
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
         run: terraform apply -auto-approve
+        working-directory: infra
