@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démineur</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        td {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            text-align: center;
+            vertical-align: middle;
+            background-color: #eee;
+            cursor: pointer;
+        }
+        td.revealed {
+            background-color: #ddd;
+        }
+        td.bomb {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Démineur</h1>
+    <table id="board"></table>
+    <script>
+        const rows = 10;
+        const cols = 10;
+        const bombs = 15;
+        const board = document.getElementById('board');
+
+        function createBoard() {
+            const bombPositions = generateBombs();
+            const cellValues = Array(rows * cols).fill(0);
+            bombPositions.forEach(pos => cellValues[pos] = -1);
+
+            // Count bombs around each cell
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (cellValues[i * cols + j] === -1) continue;
+                    let count = 0;
+                    for (let x = -1; x <= 1; x++) {
+                        for (let y = -1; y <= 1; y++) {
+                            if (x === 0 && y === 0) continue;
+                            const ni = i + x;
+                            const nj = j + y;
+                            if (ni >= 0 && ni < rows && nj >= 0 && nj < cols) {
+                                if (cellValues[ni * cols + nj] === -1) count++;
+                            }
+                        }
+                    }
+                    cellValues[i * cols + j] = count;
+                }
+            }
+
+            for (let i = 0; i < rows; i++) {
+                const row = document.createElement('tr');
+                for (let j = 0; j < cols; j++) {
+                    const cell = document.createElement('td');
+                    cell.addEventListener('click', () => revealCell(cell, i, j, cellValues));
+                    row.appendChild(cell);
+                }
+                board.appendChild(row);
+            }
+        }
+
+        function generateBombs() {
+            const bombPositions = new Set();
+            while (bombPositions.size < bombs) {
+                const pos = Math.floor(Math.random() * rows * cols);
+                bombPositions.add(pos);
+            }
+            return Array.from(bombPositions);
+        }
+
+        function revealCell(cell, row, col, cellValues) {
+            const index = row * cols + col;
+            if (cell.classList.contains('revealed')) return;
+            cell.classList.add('revealed');
+            if (cellValues[index] === -1) {
+                cell.textContent = '💣';
+                cell.classList.add('bomb');
+                alert('Game Over!');
+                return;
+            }
+            cell.textContent = cellValues[index] || '';
+            if (cellValues[index] === 0) {
+                for (let x = -1; x <= 1; x++) {
+                    for (let y = -1; y <= 1; y++) {
+                        if (x === 0 && y === 0) continue;
+                        const ni = row + x;
+                        const nj = col + y;
+                        if (ni >= 0 && ni < rows && nj >= 0 && nj < cols) {
+                            const nextCell = board.rows[ni].cells[nj];
+                            if (!nextCell.classList.contains('revealed')) {
+                                revealCell(nextCell, ni, nj, cellValues);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
