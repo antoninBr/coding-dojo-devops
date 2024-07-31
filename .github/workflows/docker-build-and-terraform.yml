@@ -52,6 +52,17 @@ jobs:
         run: terraform init
         working-directory: infra
 
+      - name: Terraform Validate
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        run: terraform validate
+        working-directory: infra
+
+      - name: Terraform Plan
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        run: terraform plan
+        working-directory: infra
 
       - name: Terraform Apply
         env:
