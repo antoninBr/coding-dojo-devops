@@ -6,6 +6,9 @@ resource "google_cloud_run_service" "default" {
     spec {
       containers {
         image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_registry_repo}/flask-minesweeper:latest"
+        ports {
+          container_port = 5000
+        }
 
         resources {
           limits = {
