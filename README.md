@@ -25,4 +25,8 @@ Code applicatif en python du jeu.
 
 Code terraform de création du service sur GCP Cloud Run et gestion IAM.
 
+## Accès
+
+https://flask-minesweeper-hyqkspxkzq-od.a.run.app/
+
 
