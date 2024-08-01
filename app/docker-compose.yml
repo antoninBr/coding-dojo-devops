@@ -1,0 +1,6 @@
+services:
+  creator:
+    image: anto/minesweeper
+    build: .
+    ports:
+      - "5000:5000"
