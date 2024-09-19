@@ -13,6 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Get Time
+        id: time
+        uses: nanzm/get-time-action@master
+        with:
+          timeZone: UTC+8
+          format: 'YYYYMMDDHHmmss'
+
       - name: Run Hadolint
         uses: hadolint/hadolint-action@v3.1.0
         with:
@@ -39,7 +46,7 @@ jobs:
           IMAGE_NAME: "${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/flask-minesweeper"
         run: |
           docker build -t $IMAGE_NAME:latest -f app/Dockerfile ./app
-          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:${{ steps.time.outputs.time }}
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
