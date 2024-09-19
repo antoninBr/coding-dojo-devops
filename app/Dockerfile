@@ -10,14 +10,7 @@ ENV VERSION=$VERSION
 # Définir le répertoire de travail
 WORKDIR /app
 
-# Copier le fichier de dépendances
-COPY requirements.txt .
-
-# Installer les dépendances
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copier le reste de l'application
-COPY . .
+# TODO: Copier application et dépendances PIP
 
 # Exposer le port 5000
 EXPOSE 5000
