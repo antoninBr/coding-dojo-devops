@@ -3,7 +3,7 @@ name: Build, Lint Dockerfile, Push Docker Image and Apply Terraform
 on:
   push:
     branches:
-      - all
+      - '*'
 
 jobs:
   build:
