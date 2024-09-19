@@ -5,8 +5,6 @@ app = Flask(__name__)
 
 version = os.environ.get('VERSION')
 
-print(version)
-
 app.config["VERSION"]=version
 
 @app.route('/')
