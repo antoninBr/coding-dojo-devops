@@ -48,6 +48,18 @@ jobs:
           docker build -t $IMAGE_NAME:${{ steps.time.outputs.time }} -f app/Dockerfile ./app
           docker push $IMAGE_NAME:${{ steps.time.outputs.time }}
 
+      - name: Build and push Stable Docker image
+        if: github.ref == 'refs/heads/main'
+        env:
+          IMAGE_NAME: "${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/flask-minesweeper"
+        run: |
+          docker build -t $IMAGE_NAME:stable -f app/Dockerfile ./app
+          docker push $IMAGE_NAME:stable
+  
+  create-update-infra:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
