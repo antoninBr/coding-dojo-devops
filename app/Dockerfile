@@ -13,8 +13,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copier le reste de l'application
 COPY . .
 
+# Initialize the database
+RUN python -c 'from app import db; db.create_all()'
+
 # Exposer le port 5000
 EXPOSE 5000
 
 # Définir la commande pour exécuter l'application
-CMD ["python", "app.py"]
+CMD ["python", "run.py"]

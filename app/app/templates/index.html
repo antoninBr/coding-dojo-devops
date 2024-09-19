@@ -1,43 +1,10 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Démineur</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        table {
-            border-collapse: collapse;
-        }
-        td {
-            width: 30px;
-            height: 30px;
-            border: 1px solid #ccc;
-            text-align: center;
-            vertical-align: middle;
-            background-color: #eee;
-            cursor: pointer;
-        }
-        td.revealed {
-            background-color: #ddd;
-        }
-        td.bomb {
-            background-color: red;
-            color: white;
-        }
-    </style>
-</head>
-<body>
-    <h1>Démineur</h1>
-    <table id="board"></table>
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<h1>Welcome to Minesweeper!</h1>
+<table id="board"></table>
+{% endblock %}
+{% block scripts %}
     <script>
         const rows = 10;
         const cols = 10;
@@ -72,6 +39,7 @@
                 const row = document.createElement('tr');
                 for (let j = 0; j < cols; j++) {
                     const cell = document.createElement('td');
+                    cell.setAttribute("id", "cell");
                     cell.addEventListener('click', () => revealCell(cell, i, j, cellValues));
                     row.appendChild(cell);
                 }
@@ -115,8 +83,6 @@
                 }
             }
         }
-
         createBoard();
     </script>
-</body>
-</html>
+{% endblock %}
