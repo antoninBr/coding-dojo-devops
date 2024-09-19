@@ -1,6 +1,13 @@
 from flask import Flask, render_template
+import os
 
 app = Flask(__name__)
+
+version = os.environ.get('VERSION')
+
+print(version)
+
+app.config["VERSION"]=version
 
 @app.route('/')
 def index():
