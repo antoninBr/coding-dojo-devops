@@ -3,7 +3,7 @@ name: Build, Lint Dockerfile, Push Docker Image and Apply Terraform
 on:
   push:
     branches:
-      - main
+      - all
 
 jobs:
   build:
@@ -45,7 +45,7 @@ jobs:
         env:
           IMAGE_NAME: "${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/flask-minesweeper"
         run: |
-          docker build -t $IMAGE_NAME:${{ steps.time.outputs.time }} -f app/Dockerfile ./app
+          docker build  --build-arg VERSION=${{ steps.time.outputs.time }} -t $IMAGE_NAME:${{ steps.time.outputs.time }} -f app/Dockerfile ./app
           docker push $IMAGE_NAME:${{ steps.time.outputs.time }}
 
       - name: Build and push Stable Docker image
@@ -53,7 +53,7 @@ jobs:
         env:
           IMAGE_NAME: "${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/flask-minesweeper"
         run: |
-          docker build -t $IMAGE_NAME:stable -f app/Dockerfile ./app
+          docker build --build-arg VERSION=stable -t $IMAGE_NAME:stable -f app/Dockerfile ./app
           docker push $IMAGE_NAME:stable
   
   create-update-infra:
