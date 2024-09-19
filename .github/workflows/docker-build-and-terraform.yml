@@ -45,7 +45,7 @@ jobs:
         env:
           IMAGE_NAME: "${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/flask-minesweeper"
         run: |
-          docker build -t $IMAGE_NAME:latest -f app/Dockerfile ./app
+          docker build -t $IMAGE_NAME:${{ steps.time.outputs.time }} -f app/Dockerfile ./app
           docker push $IMAGE_NAME:${{ steps.time.outputs.time }}
 
       - name: Install Terraform
