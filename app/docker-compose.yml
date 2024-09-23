@@ -2,6 +2,7 @@ services:
   creator:
     image: anto/minesweeper
     #TODO: Construire l'image
+    build: .
     environment:
       VERSION: "local"
     ports:
