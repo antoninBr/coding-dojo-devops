@@ -11,6 +11,9 @@ ENV VERSION=$VERSION
 WORKDIR /app
 
 # TODO: Copier application et dépendances PIP
+COPY . .
+
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Exposer le port 5000
 EXPOSE 5000
