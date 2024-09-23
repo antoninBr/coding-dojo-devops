@@ -21,6 +21,11 @@ jobs:
           format: 'YYYYMMDDHHmmss'
 
       # TODO: Ajouter validation hadolint
+      - name: Check dockerfiles with Hadolint
+        uses: essentialkaos/hadolint-action@v1
+        with:
+          failure-threshold: warning
+          files: app/Dockerfile
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
