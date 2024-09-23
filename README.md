@@ -17,7 +17,7 @@ Simple projet de construction et de déploiement sur GCP d'un démineur accessib
 
 ## Local
 
-Se positionner dans le dossier /app.
+Se positionner dans le dossier /app.  
 
 `pip install --no-cache-dir -r requirements.txt`
 
