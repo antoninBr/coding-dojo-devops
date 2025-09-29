@@ -22,7 +22,7 @@ jobs:
 
       # TODO: Ajouter validation hadolint
       - name: Check dockerfiles with Hadolint
-        uses: essentialkaos/hadolint-action@v3.3.0
+        uses: hadolint/hadolint-action@v3.1.0
         with:
           failure-threshold: warning
           files: app/Dockerfile
