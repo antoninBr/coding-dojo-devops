@@ -25,7 +25,7 @@ jobs:
         uses: hadolint/hadolint-action@v3.1.0
         with:
           failure-threshold: warning
-          files: app/Dockerfile
+          dockerfile: app/Dockerfile
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
