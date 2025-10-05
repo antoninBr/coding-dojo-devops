@@ -37,6 +37,6 @@ Code terraform de création du service sur GCP Cloud Run et gestion IAM.
 
 ## Accès
 
-https://flask-minesweeper-hyqkspxkzq-od.a.run.app/
+[https://flask-minesweeper-hyqkspxkzq-od.a.run.app/](https://flask-minesweeper-28477363719.europe-west9.run.app)
 
 
