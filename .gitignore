@@ -1,1 +1,5 @@
 coding-dojo-devops-473609-93d3bc207c68.json
+infra/.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
