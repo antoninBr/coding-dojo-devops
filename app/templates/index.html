@@ -4,122 +4,261 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Démineur</title>
+    <link rel="icon" href="{{ url_for('static', filename='logo.svg') }}" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --lichen: #e3e7df;
+            --paper: #f3f4ef;
+            --moss: #3d5a47;
+            --moss-hi: #4f7059;
+            --plate: #243a2d;
+            --ink: #16241b;
+            --muted: #56655b;
+            --signal: #e8a317;
+            --blast: #b3261e;
+            --cell: 34px;
+            --gap: 3px;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background-color: #f0f0f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--lichen);
+            color: var(--ink);
+            font-family: "Bricolage Grotesque", system-ui, sans-serif;
+            font-size: 1rem;
+            line-height: 1.5;
         }
-        table {
-            border-collapse: collapse;
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem 3rem;
+            justify-content: center;
+            align-items: flex-start;
+            align-content: center;
+            padding: 2.5rem 1rem 2rem;
         }
-        td {
-            width: 30px;
-            height: 30px;
-            border: 1px solid #ccc;
-            text-align: center;
-            vertical-align: middle;
-            background-color: #eee;
+
+        .panel { flex: 0 1 24rem; }
+        .panel header { display: flex; align-items: center; gap: 0.9rem; }
+        .panel header img { width: clamp(2.75rem, 7vw, 4rem); height: auto; }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(3rem, 9vw, 5.5rem);
+            font-weight: 800;
+            font-stretch: 75%;
+            font-variation-settings: "opsz" 96;
+            line-height: 0.9;
+            letter-spacing: -0.02em;
+        }
+
+        .lede {
+            margin: 1rem 0 1.75rem;
+            color: var(--muted);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.25rem;
+        }
+
+        .levels {
+            display: inline-flex;
+            margin: 0;
+            padding: 3px;
+            border: 0;
+            border-radius: 999px;
+            background: #d3d9d0;
+        }
+        .levels legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+        .levels label { position: relative; }
+        .levels input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+        .levels span {
+            display: block;
+            padding: 0.35rem 1rem;
+            border-radius: 999px;
+            font-weight: 600;
+            color: var(--muted);
+        }
+        .levels input:checked + span { background: var(--plate); color: var(--paper); }
+        .levels input:focus-visible + span { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+        .readout {
+            display: flex;
+            gap: 1.25rem;
+            align-items: center;
+            font-variant-numeric: tabular-nums;
+        }
+        .readout dl { display: flex; gap: 1.25rem; margin: 0; }
+        .readout div { display: flex; align-items: baseline; gap: 0.4rem; }
+        .readout dt { color: var(--muted); font-size: 0.875rem; }
+        .readout dd { margin: 0; font-size: 1.5rem; font-weight: 700; min-width: 2.5ch; }
+
+        #restart {
+            font: inherit;
+            font-weight: 700;
+            padding: 0.5rem 1.1rem;
+            border: 0;
+            border-radius: 8px;
+            background: var(--signal);
+            color: var(--ink);
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+        }
+        #restart:hover { filter: brightness(1.06); }
+        #restart:active { transform: translateY(1px); box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.18); }
+
+        .field {
+            flex: 0 1 auto;
+            max-width: 100%;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        #board {
+            display: inline-flex;
+            flex-direction: column;
+            gap: var(--gap);
+            padding: 12px;
+            border-radius: 14px;
+            background: var(--plate);
+            font-size: 1.05rem;
+            user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
+        }
+        .row { display: flex; gap: var(--gap); }
+        #board[data-level="facile"] { --cell: min(46px, calc((100vw - 2rem - 24px) / 9 - var(--gap))); font-size: 1.2rem; }
+
+        .cell {
+            width: var(--cell);
+            height: var(--cell);
+            padding: 0;
+            border: 0;
+            border-radius: 5px;
+            background: var(--moss);
+            box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.12), inset 0 -3px 0 rgba(0, 0, 0, 0.25);
+            font: inherit;
+            font-weight: 800;
+            font-size: inherit;
+            line-height: 1;
+            color: var(--ink);
             cursor: pointer;
         }
-        td.revealed {
-            background-color: #ddd;
+        .cell:hover:not(.revealed) { background-color: var(--moss-hi); }
+        .cell:focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; position: relative; z-index: 1; }
+
+        .cell.revealed {
+            background: var(--paper);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
+            cursor: default;
         }
-        td.bomb {
-            background-color: red;
-            color: white;
+        .cell[data-n="1"] { color: #2c62a8; }
+        .cell[data-n="2"] { color: #2f7d4a; }
+        .cell[data-n="3"] { color: #c2412d; }
+        .cell[data-n="4"] { color: #4b3a9a; }
+        .cell[data-n="5"] { color: #8c3b1f; }
+        .cell[data-n="6"] { color: #1f7a7a; }
+        .cell[data-n="7"] { color: var(--ink); }
+        .cell[data-n="8"] { color: var(--muted); }
+
+        .cell.flagged {
+            background: var(--moss) center / 55% no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 2v16' stroke='%23f3f4ef' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M6 2.5h11l-3.5 4 3.5 4H6z' fill='%23e8a317'/%3E%3C/svg%3E");
+        }
+        .cell.mine { background: #d9ddd5; color: var(--ink); }
+        .cell.mine.hit { background: var(--blast); color: var(--paper); }
+        .cell.wrong { background-color: #8a9a8f; }
+
+        /* Fin de partie : les mines apparaissent en onde depuis la case touchée. */
+        body[data-state="lost"] .cell.mine:not(.hit) {
+            animation: surface 260ms ease-out both;
+            animation-delay: var(--delay, 0ms);
+        }
+        body[data-state="won"] #board { animation: cleared 700ms ease-out; }
+        body[data-state="lost"] .cell:not(.revealed),
+        body[data-state="won"] .cell:not(.revealed) { cursor: default; }
+
+        @keyframes surface {
+            from { transform: scale(0.4); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes cleared {
+            0% { box-shadow: 0 0 0 0 rgba(232, 163, 23, 0.7); }
+            100% { box-shadow: 0 0 0 18px rgba(232, 163, 23, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; }
+        }
+
+        #status {
+            min-height: 3em;
+            margin: 1.5rem 0 0;
+            font-weight: 600;
+        }
+        body[data-state="lost"] #status { color: var(--blast); }
+        body[data-state="won"] #status { color: var(--moss); }
+
+        footer {
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--muted);
+        }
+
+        @media (max-width: 480px) {
+            :root { --cell: 30px; --gap: 2px; }
+            main { padding-top: 1.5rem; }
         }
     </style>
 </head>
-<body>
-    <h1>Démineur</h1>
-    <table id="board"></table>
-    <script>
-        const rows = 10;
-        const cols = 10;
-        const bombs = 15;
-        const board = document.getElementById('board');
+<body data-state="ready">
+    <main>
+        <section class="panel">
+            <header>
+                <img src="{{ url_for('static', filename='logo.svg') }}" alt="">
+                <h1>Démineur</h1>
+            </header>
+            <p class="lede">Découvrez toutes les cases sans toucher de mine. Les chiffres indiquent combien de mines entourent une case.</p>
 
-        function createBoard() {
-            const bombPositions = generateBombs();
-            const cellValues = Array(rows * cols).fill(0);
-            bombPositions.forEach(pos => cellValues[pos] = -1);
+            <div class="controls">
+                <fieldset class="levels">
+                    <legend>Niveau</legend>
+                    <label><input type="radio" name="level" value="facile" checked><span>Facile</span></label>
+                    <label><input type="radio" name="level" value="moyen"><span>Moyen</span></label>
+                    <label><input type="radio" name="level" value="expert"><span>Expert</span></label>
+                </fieldset>
 
-            // Count bombs around each cell
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    if (cellValues[i * cols + j] === -1) continue;
-                    let count = 0;
-                    for (let x = -1; x <= 1; x++) {
-                        for (let y = -1; y <= 1; y++) {
-                            if (x === 0 && y === 0) continue;
-                            const ni = i + x;
-                            const nj = j + y;
-                            if (ni >= 0 && ni < rows && nj >= 0 && nj < cols) {
-                                if (cellValues[ni * cols + nj] === -1) count++;
-                            }
-                        }
-                    }
-                    cellValues[i * cols + j] = count;
-                }
-            }
+                <div class="readout">
+                    <dl>
+                        <div><dt>Mines</dt><dd id="mines-left">10</dd></div>
+                        <div><dt>Temps</dt><dd id="timer">0</dd></div>
+                    </dl>
+                    <button id="restart" type="button">Nouvelle partie</button>
+                </div>
+            </div>
+            <p id="status" role="status" aria-live="polite"></p>
+        </section>
 
-            for (let i = 0; i < rows; i++) {
-                const row = document.createElement('tr');
-                for (let j = 0; j < cols; j++) {
-                    const cell = document.createElement('td');
-                    cell.addEventListener('click', () => revealCell(cell, i, j, cellValues));
-                    row.appendChild(cell);
-                }
-                board.appendChild(row);
-            }
-        }
+        <div class="field">
+            <div id="board" role="grid" aria-label="Plateau du démineur"></div>
+        </div>
+    </main>
 
-        function generateBombs() {
-            const bombPositions = new Set();
-            while (bombPositions.size < bombs) {
-                const pos = Math.floor(Math.random() * rows * cols);
-                bombPositions.add(pos);
-            }
-            return Array.from(bombPositions);
-        }
+    <footer>Version : {{ config.VERSION or "locale" }}</footer>
 
-        function revealCell(cell, row, col, cellValues) {
-            const index = row * cols + col;
-            if (cell.classList.contains('revealed')) return;
-            cell.classList.add('revealed');
-            if (cellValues[index] === -1) {
-                cell.textContent = '💣';
-                cell.classList.add('bomb');
-                alert('Game Over!');
-                return;
-            }
-            cell.textContent = cellValues[index] || '';
-            if (cellValues[index] === 0) {
-                for (let x = -1; x <= 1; x++) {
-                    for (let y = -1; y <= 1; y++) {
-                        if (x === 0 && y === 0) continue;
-                        const ni = row + x;
-                        const nj = col + y;
-                        if (ni >= 0 && ni < rows && nj >= 0 && nj < cols) {
-                            const nextCell = board.rows[ni].cells[nj];
-                            if (!nextCell.classList.contains('revealed')) {
-                                revealCell(nextCell, ni, nj, cellValues);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        createBoard();
-    </script>
+    <script src="{{ url_for('static', filename='minesweeper.js') }}"></script>
 </body>
-<footer>
-    <a>Version : {{ config.VERSION }}</a>
-</footer>
 </html>

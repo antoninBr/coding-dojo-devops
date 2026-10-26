@@ -1,3 +1,5 @@
+<p align="center"><img src="app/static/logo.svg" width="96" alt="Logo Démineur"></p>
+
 # coding-dojo-devops
 
 Coding dojo DevOps : on prend une petite application web (un **démineur** en Python/Flask) et on la fait passer
@@ -5,12 +7,19 @@ du code source jusqu'à une URL publique en **https** sur Google Cloud, de mani�
 
 Le but n'est pas le jeu, mais tout ce qu'il y a autour :
 
+* **tester** le code automatiquement (pytest + ruff) ;
 * **conteneuriser** une application (Docker) ;
 * **vérifier** sa qualité automatiquement (lint du Dockerfile avec hadolint) ;
 * **construire et publier** une image à chaque push (GitHub Actions + Artifact Registry) ;
 * **décrire l'infrastructure en code** et la déployer (Terraform + Cloud Run).
 
 > Un `git push` sur `main` = une nouvelle version en ligne, sans aucune action manuelle.
+
+![Capture du démineur](docs/screenshot.png)
+
+Le jeu : trois niveaux, clic pour découvrir, clic droit (ou appui long sur mobile) pour poser un drapeau,
+clic sur un chiffre pour découvrir ses voisins quand tous les drapeaux sont posés. Jouable au clavier
+(flèches, Entrée, `F`).
 
 ## Vue d'ensemble de la stack
 
@@ -19,11 +28,12 @@ flowchart LR
     dev["👩‍💻 Développeur"] -- git push --> gh["GitHub<br/>repo coding-dojo-devops"]
 
     subgraph ci["GitHub Actions"]
-        lint["hadolint<br/>(lint Dockerfile)"] --> build["docker build"]
+        test["pytest + ruff<br/>(tests Python)"] --> lint["hadolint<br/>(lint Dockerfile)"]
+        lint --> build["docker build"]
         build --> tf["terraform plan / apply"]
     end
 
-    gh --> lint
+    gh --> test
 
     subgraph gcp["Google Cloud (projet coding-dojo-devops, europe-west9)"]
         ar[("Artifact Registry<br/>repo app")]
@@ -40,7 +50,8 @@ flowchart LR
 
 | Brique | Rôle |
 |---|---|
-| **Python / Flask** | L'application : sert la page du démineur sur le port 5000. |
+| **Python / Flask** | L'application : sert la page du démineur sur le port 5000 (le jeu lui-même tourne en JavaScript dans le navigateur). |
+| **pytest / ruff** | Tests unitaires et linter Python : le pipeline s'arrête si l'un échoue. |
 | **Docker** | Emballe l'application et ses dépendances dans une image exécutable partout. |
 | **GitHub Actions** | La CI/CD : exécute le pipeline à chaque push. |
 | **hadolint** | Linter de Dockerfile : bloque le pipeline si le Dockerfile ne respecte pas les bonnes pratiques. |
@@ -63,6 +74,7 @@ sequenceDiagram
     participant CR as Cloud Run
 
     Dev->>GH: git push (n'importe quelle branche)
+    GH->>GH: ruff check + pytest
     GH->>GH: hadolint app/Dockerfile
     GH->>GH: docker build (tag = horodatage)
     GH->>AR: docker push flask-minesweeper:AAAAMMJJHHMMSS
@@ -76,7 +88,7 @@ sequenceDiagram
     end
 ```
 
-* **Toutes les branches** : lint + build + push d'une image taguée avec la date. Ça permet de vérifier que tout
+* **Toutes les branches** : tests + lint + build + push d'une image taguée avec la date. Ça permet de vérifier que tout
   se construit, sans toucher à la production.
 * **Branche `main`** : en plus, publication du tag `stable` et déploiement Terraform sur Cloud Run.
 
@@ -86,8 +98,12 @@ sequenceDiagram
 .
 ├── app/                     # L'application
 │   ├── app.py               # Serveur Flask
-│   ├── templates/index.html # Le démineur (HTML/JS)
+│   ├── templates/index.html # Page du jeu (HTML/CSS)
+│   ├── static/              # Logique du jeu (JS) et logo
+│   ├── tests/               # Tests pytest
 │   ├── requirements.txt     # Dépendances Python
+│   ├── requirements-dev.txt # Dépendances de test (pytest, ruff)
+│   ├── pyproject.toml       # Configuration pytest / ruff
 │   ├── Dockerfile           # Construction de l'image
 │   └── docker-compose.yml   # Lancement local avec Docker
 ├── infra/                   # L'infrastructure (Terraform)
@@ -98,7 +114,7 @@ sequenceDiagram
 │   ├── env.tfvars           # Valeurs : projet, région, registre
 │   ├── main.tf              # Service Cloud Run
 │   └── iam.tf               # Accès public (allUsers -> run.invoker)
-├── docs/                    # Documentation à publier
+├── docs/                    # Documentation à publier, capture d'écran
 └── .github/workflows/       # Pipeline CI/CD
 ```
 
@@ -120,6 +136,15 @@ docker compose up --build
 ```
 
 L'application est accessible sur http://localhost:5000 (ou sur l'URL indiquée par la console dans un GitHub Codespace).
+
+Lancer les tests et le linter (ce que fait la CI) :
+
+```bash
+cd app
+pip install -r requirements-dev.txt
+ruff check .
+pytest -v
+```
 
 ## Configuration GCP
 

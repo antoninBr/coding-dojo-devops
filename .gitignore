@@ -3,3 +3,7 @@ infra/.terraform/
 terraform.tfstate
 terraform.tfstate.backup
 .terraform.lock.hcl
+app/.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
