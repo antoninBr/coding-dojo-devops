@@ -93,6 +93,33 @@ sequenceDiagram
   l'image du tag horodaté. Ce tag ne change jamais, donc chaque push crée bien une nouvelle révision
   (avec un tag mobile comme `stable`, Terraform ne verrait aucune différence et ne redéploierait rien).
 
+## Maîtriser les coûts : `maxScale`
+
+Cloud Run facture à l'usage : CPU et mémoire pendant le traitement des requêtes, nombre de requêtes et trafic
+sortant. Sans trafic, le service descend à **0 instance** et ne coûte rien. Avec beaucoup de trafic, il crée
+automatiquement de nouvelles instances, jusqu'à **100 par défaut**... et la facture suit.
+
+Dans [`infra/main.tf`](infra/main.tf), une annotation plafonne ce nombre :
+
+```hcl
+metadata {
+  annotations = {
+    "autoscaling.knative.dev/maxScale" = "2"
+  }
+}
+```
+
+* Chaque instance traite jusqu'à 80 requêtes en parallèle (`containerConcurrency`). Au-delà de
+  2 × 80 requêtes simultanées, Cloud Run met les requêtes en attente puis répond `429` plutôt que d'ajouter
+  des machines.
+* Le coût CPU/mémoire est donc borné : au pire 2 instances qui tournent en continu.
+* Ce qui **n'est pas** borné : le prix par requête et le trafic sortant. Un vrai DDoS se traite en amont
+  (Cloud Armor derrière un load balancer), avec une **alerte de budget** sur le compte de facturation pour
+  être prévenu.
+
+C'est un compromis classique : on accepte de dégrader le service (des `429`) pour garantir la facture.
+Pour un site marchand, on ferait l'inverse.
+
 ## Organisation du repo
 
 ```text
