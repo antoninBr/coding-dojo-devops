@@ -5,13 +5,14 @@ resource "google_cloud_run_service" "default" {
   template {
     spec {
       containers {
-        image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_registry_repo}/flask-minesweeper:stable"
+        image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_registry_repo}/flask-minesweeper:${var.image_tag}"
         ports {
           container_port = 5000
         }
 
         resources {
           limits = {
+            cpu    = "1000m"
             memory = "512Mi"
           }
         }

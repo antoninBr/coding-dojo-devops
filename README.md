@@ -44,7 +44,7 @@ flowchart LR
     build -- docker push --> ar
     tf -- lit / écrit l'état --> state
     tf -- crée / met à jour --> run
-    ar -- image :stable --> run
+    ar -- image du build --> run
     user["🌍 Utilisateurs"] -- https --> run
 ```
 
@@ -80,17 +80,18 @@ sequenceDiagram
     GH->>AR: docker push flask-minesweeper:AAAAMMJJHHMMSS
 
     alt branche main uniquement
-        GH->>GH: docker build (tag = stable)
-        GH->>AR: docker push flask-minesweeper:stable
+        GH->>AR: même image retaguée flask-minesweeper:stable
         GH->>TF: terraform init / plan / apply
-        TF->>CR: crée ou met à jour le service (image :stable)
+        TF->>CR: nouvelle révision avec l'image AAAAMMJJHHMMSS
         CR-->>Dev: application en ligne en https
     end
 ```
 
 * **Toutes les branches** : tests + lint + build + push d'une image taguée avec la date. Ça permet de vérifier que tout
   se construit, sans toucher à la production.
-* **Branche `main`** : en plus, publication du tag `stable` et déploiement Terraform sur Cloud Run.
+* **Branche `main`** : en plus, l'image est aussi taguée `stable`, puis Terraform déploie sur Cloud Run
+  l'image du tag horodaté. Ce tag ne change jamais, donc chaque push crée bien une nouvelle révision
+  (avec un tag mobile comme `stable`, Terraform ne verrait aucune différence et ne redéploierait rien).
 
 ## Organisation du repo
 

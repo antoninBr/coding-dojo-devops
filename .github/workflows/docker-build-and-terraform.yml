@@ -35,6 +35,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: test
+    outputs:
+      image_tag: ${{ steps.time.outputs.time }}
 
     steps:
       - name: Checkout code
@@ -74,12 +76,12 @@ jobs:
           docker build  --build-arg VERSION=${{ steps.time.outputs.time }} -t $IMAGE_NAME:${{ steps.time.outputs.time }} -f app/Dockerfile ./app
           docker push $IMAGE_NAME:${{ steps.time.outputs.time }}
 
-      - name: Build and push Stable Docker image
+      - name: Tag image as stable
         if: github.ref == 'refs/heads/main'
         env:
           IMAGE_NAME: "${{ secrets.REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REGISTRY_REPO }}/flask-minesweeper"
         run: |
-          docker build --build-arg VERSION=stable -t $IMAGE_NAME:stable -f app/Dockerfile ./app
+          docker tag $IMAGE_NAME:${{ steps.time.outputs.time }} $IMAGE_NAME:stable
           docker push $IMAGE_NAME:stable
   
   create-update-infra:
@@ -105,11 +107,11 @@ jobs:
       - name: Terraform Plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-        run: terraform plan -var-file="env.tfvars"
+        run: terraform plan -var-file="env.tfvars" -var="image_tag=${{ needs.build.outputs.image_tag }}"
         working-directory: infra
 
       - name: Terraform Apply
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
-        run: terraform apply -auto-approve -var-file="env.tfvars"
+        run: terraform apply -auto-approve -var-file="env.tfvars" -var="image_tag=${{ needs.build.outputs.image_tag }}"
         working-directory: infra
