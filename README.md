@@ -58,7 +58,7 @@ flowchart LR
 | **Artifact Registry** | Registre privé GCP qui stocke les images Docker. |
 | **Terraform** | Infrastructure as Code : décrit le service Cloud Run et ses droits, puis l'applique. |
 | **Cloud Storage** | Stocke le *state* Terraform (ce que Terraform a déjà créé) pour qu'il soit partagé. |
-| **Cloud Run** | Exécute le conteneur en serverless et l'expose en https. |
+| **Cloud Run** | Exécute le conteneur en serverless et l'expose en https. Descend à 0 instance sans trafic, plafonné à 2. |
 
 ## Processus de déploiement
 
@@ -113,11 +113,19 @@ sequenceDiagram
 │   ├── provider.tf          # Configuration du provider google
 │   ├── variables.tf         # Variables d'entrée
 │   ├── env.tfvars           # Valeurs : projet, région, registre
-│   ├── main.tf              # Service Cloud Run
+│   ├── main.tf              # Service Cloud Run (plafonné à 2 instances)
 │   └── iam.tf               # Accès public (allUsers -> run.invoker)
 ├── docs/                    # Documentation à publier, capture d'écran
 └── .github/workflows/       # Pipeline CI/CD
 ```
+
+## Prérequis
+
+* Un compte GitHub avec accès au repo.
+* Git et Python 3.10+ en local, ou un **GitHub Codespace** (rien à installer).
+* Docker, optionnel, pour tester l'image en local.
+
+Aucun accès à la console GCP n'est nécessaire : c'est la CI qui parle à Google Cloud.
 
 ## Lancer en local
 
@@ -176,8 +184,15 @@ Les exercices sont signalés par des commentaires `TODO` dans le code :
 git grep -n TODO
 ```
 
-On travaille sur la branche `dojo`. Chaque push déclenche le pipeline : regardez l'onglet **Actions** de GitHub
-pour voir ce qui passe... ou casse.
+On travaille sur la branche `dojo`. Chaque push déclenche le pipeline (tests, lint, build, push de l'image) :
+regardez l'onglet **Actions** de GitHub pour voir ce qui passe... ou casse. Le déploiement sur Cloud Run ne
+part que depuis `main`, via une pull request depuis `dojo`.
+
+Règles du jeu :
+
+* jamais de secret ni de clé dans le code : tout passe par les secrets GitHub ;
+* un pipeline rouge se répare avant de pousser autre chose ;
+* on lit le message d'erreur en entier avant de demander de l'aide.
 
 ## Accès
 

@@ -3,6 +3,13 @@ resource "google_cloud_run_service" "default" {
   location = var.region
 
   template {
+    metadata {
+      annotations = {
+        # Plafond d'instances : limite la facture en cas de pic de trafic (ou d'attaque).
+        "autoscaling.knative.dev/maxScale" = "2"
+      }
+    }
+
     spec {
       containers {
         image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.artifact_registry_repo}/flask-minesweeper:${var.image_tag}"
