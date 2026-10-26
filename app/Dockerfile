@@ -1,5 +1,5 @@
 # Utiliser l'image Python alpine de base
-FROM python:3.9-alpine
+FROM python:3.14-alpine
 
 #ARGUMENT
 ARG VERSION
