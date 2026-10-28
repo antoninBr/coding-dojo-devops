@@ -1,21 +1,3 @@
-# Tout le dossier app/ est le contexte de build : il est envoyé à Docker à chaque build.
-# Exclure ce qui n'a rien à faire dans l'image accélère le build :
-#   - contexte plus petit à transférer ;
-#   - le "COPY . ." n'est plus invalidé par un fichier sans rapport (tests, cache, config locale).
-
-# Environnements et caches Python
-.venv/
-__pycache__/
-*.pyc
-.pytest_cache/
-.ruff_cache/
-
-# Tests et outillage de dev
-tests/
-requirements-dev.txt
-pyproject.toml
-
-# Fichiers Docker eux-mêmes
-Dockerfile
-.dockerignore
-docker-compose.yml
+# TODO: Accélérer le build en excluant du contexte Docker tout ce qui n'a rien à faire dans l'image
+#       (environnement virtuel, caches, tests, outillage de dev...).
+#       Comparer la ligne "transferring context" des logs de build avant / après.
