@@ -46,7 +46,6 @@ jobs:
         id: time
         run: echo "time=$(TZ=Europe/Paris date +%Y%m%d%H%M%S)" >> "$GITHUB_OUTPUT"
 
-      # TODO: Ajouter validation hadolint
       - name: Check dockerfiles with Hadolint
         uses: hadolint/hadolint-action@v3.5.0
         with:

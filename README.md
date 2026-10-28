@@ -50,9 +50,9 @@ flowchart LR
 
 | Brique | Rôle |
 |---|---|
-| **Python / Flask** | L'application : sert la page du démineur sur le port 5000 (le jeu lui-même tourne en JavaScript dans le navigateur). |
+| **Python / Flask / gunicorn** | L'application : sert la page du démineur sur le port 5000 (le jeu lui-même tourne en JavaScript dans le navigateur). gunicorn est le serveur de production dans le conteneur. |
 | **pytest / ruff** | Tests unitaires et linter Python : le pipeline s'arrête si l'un échoue. |
-| **Docker** | Emballe l'application et ses dépendances dans une image exécutable partout. |
+| **Docker** | Emballe l'application et ses dépendances dans une image exécutable partout. Build *multistage* : une image intermédiaire installe les dépendances, l'image finale ne garde que le nécessaire. |
 | **GitHub Actions** | La CI/CD : exécute le pipeline à chaque push. |
 | **hadolint** | Linter de Dockerfile : bloque le pipeline si le Dockerfile ne respecte pas les bonnes pratiques. |
 | **Artifact Registry** | Registre privé GCP qui stocke les images Docker. |
@@ -132,7 +132,8 @@ Pour un site marchand, on ferait l'inverse.
 │   ├── requirements.txt     # Dépendances Python
 │   ├── requirements-dev.txt # Dépendances de test (pytest, ruff)
 │   ├── pyproject.toml       # Configuration pytest / ruff
-│   ├── Dockerfile           # Construction de l'image
+│   ├── Dockerfile           # Construction de l'image (multistage)
+│   ├── .dockerignore        # Fichiers exclus du contexte de build
 │   └── docker-compose.yml   # Lancement local avec Docker
 ├── infra/                   # L'infrastructure (Terraform)
 │   ├── backend.tf           # State stocké dans un bucket GCS
@@ -142,8 +143,8 @@ Pour un site marchand, on ferait l'inverse.
 │   ├── env.tfvars           # Valeurs : projet, région, registre
 │   ├── main.tf              # Service Cloud Run (plafonné à 2 instances)
 │   └── iam.tf               # Accès public (allUsers -> run.invoker)
-├── docs/                    # Documentation à publier, capture d'écran
-└── .github/workflows/       # Pipeline CI/CD
+├── docs/                    # Documentation (AsciiDoc) publiée sur GitHub Pages
+└── .github/workflows/       # Pipeline CI/CD et publication de la doc
 ```
 
 ## Prérequis
@@ -205,15 +206,32 @@ Secrets GitHub utilisés par le pipeline (*Settings > Secrets and variables > Ac
 
 ## Le dojo
 
-Les exercices sont signalés par des commentaires `TODO` dans le code :
+Le repo a deux branches :
+
+* **`dojo`** : l'énoncé. Le code à écrire a été retiré et remplacé par des commentaires `TODO`. On part de là.
+* **`main`** : la solution complète, celle qui tourne en production.
+
+Une pull request en *draft* `dojo` → `main` affiche le diff entre les deux, c'est-à-dire la correction.
+Elle ne sera **jamais mergée**, et on ne la regarde qu'à la fin 😉
+
+Pour démarrer :
 
 ```bash
+git switch -c feature/<prenom> origin/dojo
 git grep -n TODO
 ```
 
-On travaille sur la branche `dojo`. Chaque push déclenche le pipeline (tests, lint, build, push de l'image) :
-regardez l'onglet **Actions** de GitHub pour voir ce qui passe... ou casse. Le déploiement sur Cloud Run ne
-part que depuis `main`, via une pull request depuis `dojo`.
+| Exercice | Où |
+|---|---|
+| Valider le Dockerfile avec hadolint dans la CI | `.github/workflows/docker-build-and-terraform.yml` |
+| Écrire un Dockerfile multistage (dépendances, utilisateur non root, cache) | `app/Dockerfile` |
+| Accélérer le build avec un `.dockerignore` | `app/.dockerignore` |
+| Construire l'image avec docker compose | `app/docker-compose.yml` |
+| Exposer l'URL du service en sortie Terraform | `infra/main.tf` |
+| Écrire une doc et la publier sur GitHub Pages | `docs/index.adoc` + un nouveau workflow |
+
+Chaque push déclenche le pipeline (tests, lint, build, push de l'image) : regardez l'onglet **Actions** de GitHub
+pour voir ce qui passe... ou casse. Le déploiement sur Cloud Run ne part que depuis `main`.
 
 Règles du jeu :
 
@@ -223,4 +241,5 @@ Règles du jeu :
 
 ## Accès
 
-https://flask-minesweeper-28477363719.europe-west9.run.app
+* Le jeu : https://flask-minesweeper-28477363719.europe-west9.run.app
+* La doc : https://antoninbr.github.io/coding-dojo-devops/

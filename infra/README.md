@@ -36,5 +36,5 @@ No modules.
 
 | Name | Description |
 |------|-------------|
-| <a name="output_cloud_run_url"></a> [cloud\_run\_url](#output\_cloud\_run\_url) | n/a |
+| <a name="output_cloud_run_url"></a> [cloud\_run\_url](#output\_cloud\_run\_url) | URL publique du service Cloud Run. |
 <!-- END_TF_DOCS -->
